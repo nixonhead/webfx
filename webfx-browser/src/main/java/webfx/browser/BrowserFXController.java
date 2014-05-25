@@ -47,6 +47,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javarestart.AppClassLoader;
+import javarestart.Cacher;
 import webfx.JavaRestartURLHandler;
 
 import java.io.IOException;
@@ -65,7 +66,9 @@ import java.util.logging.Logger;
 public class BrowserFXController implements TabManager {
 
     private static final Logger LOGGER = Logger.getLogger(BrowserFXController.class.getName());
-    private static final String HOME_PAGE = "localhost:8080";
+//    private static final String HOME_PAGE = "localhost:8080";
+    private static final String HOME_PAGE = "javarestart.jelasticloud.com";
+    private final Cacher CACHER = new Cacher();
     /**
      * Components
      */
@@ -161,12 +164,12 @@ public class BrowserFXController implements TabManager {
         Platform.runLater(() -> {
             BrowserTab browserTab;
             if (isFxml) {
-                browserTab = new FXTab(locale);
+                browserTab = new FXTab(locale, CACHER);
                 browserTab.getNavigationContext().goTo(url);
             } else if (isWebFx) {
                 try {
-                    final AppClassLoader appClassloader = new AppClassLoader(url);
-                    browserTab = new FXTab(locale, appClassloader);
+                    final AppClassLoader appClassloader = new AppClassLoader(url, CACHER);
+                    browserTab = new FXTab(locale, appClassloader, CACHER);
                     browserTab.getNavigationContext().goTo(appClassloader.getFxml());
                 } catch (final IOException e) {
 

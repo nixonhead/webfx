@@ -44,6 +44,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
+import javarestart.Cacher;
 import webfx.NavigationContext;
 import webfx.WebFXRegion;
 
@@ -60,18 +61,18 @@ public class FXTab implements BrowserTab {
     private final WebFXRegion webfx;
     private TabManager tabManager;
 
-    public FXTab() {
-        webfx = new WebFXRegion();
+    public FXTab(final Cacher cacher) {
+        webfx = new WebFXRegion(cacher);
         contentProperty.set(webfx);
     }
 
-    FXTab(Locale locale) {
-        this(locale, null);
+    FXTab(Locale locale, final Cacher cacher) {
+        this(locale, null, cacher);
 
     }
 
-    FXTab(final Locale locale, final ClassLoader cl) {
-        webfx = new WebFXRegion(cl);
+    FXTab(final Locale locale, final ClassLoader cl, final Cacher cacher) {
+        webfx = new WebFXRegion(cl, cacher);
         contentProperty.set(webfx);
         webfx.setLocale(locale);
     }

@@ -43,6 +43,7 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.layout.AnchorPane;
 import javarestart.AppClassLoader;
+import javarestart.Cacher;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -65,18 +66,20 @@ public final class WebFXRegion extends AnchorPane {
     private final ReadOnlyStringProperty currentTitle = new SimpleStringProperty();
     private Locale locale;
     private ClassLoader cl = null;
+    private final Cacher cacher;
 
-    public WebFXRegion() {
+    public WebFXRegion(final Cacher cacher) {
         navigationContext = new NavigationContextImpl();
+        this.cacher = cacher;
     }
 
-    public WebFXRegion(final ClassLoader cl) {
-        this();
+    public WebFXRegion(final ClassLoader cl, final Cacher cacher) {
+        this(cacher);
         this.cl = cl;
     }
 
-    public WebFXRegion(URL url) {
-        this();
+    public WebFXRegion(URL url, final Cacher cacher) {
+        this(cacher);
         navigationContext.goTo(url);
     }
 
@@ -168,8 +171,14 @@ public final class WebFXRegion extends AnchorPane {
             WebFXRegion.this.loadUrl(url);
 
             if (incrementHistory) {
-                urlHistory.add(new HistoryEntry(url, cl));
-                currentURLHistoryIndex = urlHistory.size() - 1;
+                HistoryEntry history = new HistoryEntry(url, cl);
+                if (currentURLHistoryIndex == urlHistory.size() - 1) {
+                    urlHistory.add(history);
+                    currentURLHistoryIndex = urlHistory.size() - 1;
+                } else {
+                    ++currentURLHistoryIndex;
+                    urlHistory.set(currentURLHistoryIndex, history);
+                }
             }
         }
 
@@ -193,7 +202,8 @@ public final class WebFXRegion extends AnchorPane {
                     destination = new URL(basePath.toString() + "/" + url);
                     if (!url.endsWith(".fxml")) {
                         try {
-                            AppClassLoader cl_ = new AppClassLoader(destination);
+                            AppClassLoader cl_ = new AppClassLoader(destination,
+                                    cacher);
                             destination = cl_.getFxml();
                             cl = cl_;
                         } catch (IOException e) {
